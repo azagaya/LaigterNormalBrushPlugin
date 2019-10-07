@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file>sphere_vertex.glsl</file>
+        <file>sphere_fragment.glsl</file>
+        <file>plane_fragment.glsl</file>
+        <file>plane_vertex.glsl</file>
+    </qresource>
+</RCC>
