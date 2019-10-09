@@ -23,15 +23,24 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   void setProcessor(ImageProcessor *processor) override;
 
   public slots:
-  void setRadius(int r);
+  void set_radius(int r);
   void set_normal(QColor n);
+  void set_mix(int m);
+  void set_hardness(int h);
+  void set_lineSelected(bool l);
+  void set_eraserSelected(bool e);
+  void set_brushSelected(bool b);
 
   private:
-  QImage *m_normal;
+  QImage *m_normal, auxNormal, oldNormal;
   int radius;
   QColor normalColor;
   NormalBrushGui *gui;
   ImageProcessor *m_processor;
+  float alpha = 0.8;
+  float hardness = 0.8;
+
+  bool linesSelected = true, brushSelected = true, eraserSelected = false, selected = true;
 
 };
 

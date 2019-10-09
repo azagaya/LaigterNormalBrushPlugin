@@ -31,4 +31,5 @@ DISTFILES += \
   sphere_vertex.glsl
 
 RESOURCES += \
+  icons.qrc \
   shaders.qrc
