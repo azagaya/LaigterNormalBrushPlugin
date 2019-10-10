@@ -170,7 +170,7 @@ void NormalBrushPlugin::setProcessor(ImageProcessor *processor){
   m_processor = processor;
 }
 
-void NormalBrushPlugin::loadGUI(QWidget *parent){
+QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
   gui = new NormalBrushGui(parent);
   connect(gui,SIGNAL(radius_changed(int)),this,SLOT(set_radius(int)));
   connect(gui,SIGNAL(normal_changed(QColor)),this,SLOT(set_normal(QColor)));
@@ -180,7 +180,8 @@ void NormalBrushPlugin::loadGUI(QWidget *parent){
   connect(gui,SIGNAL(brushSelected_changed(bool)),this,SLOT(set_brushSelected(bool)));
   connect(gui,SIGNAL(eraserSelected_changed(bool)),this,SLOT(set_eraserSelected(bool)));
   radius = 10;
-  gui->show();
+  //gui->show();
+  return gui;
 }
 
 void NormalBrushPlugin::set_radius(int r){
@@ -209,4 +210,12 @@ void NormalBrushPlugin::set_eraserSelected(bool e){
 
 void NormalBrushPlugin::set_brushSelected(bool b){
   brushSelected = b;
+}
+
+QIcon NormalBrushPlugin::getIcon(){
+  return QIcon(QPixmap(":/icons/icon.png"));
+}
+
+QString NormalBrushPlugin::getName(){
+  return m_name;
 }

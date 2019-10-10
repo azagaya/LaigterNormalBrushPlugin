@@ -31,6 +31,9 @@ class NormalSelectorWidget : public QOpenGLWidget, protected QOpenGLFunctions
   void resizeGL(int width, int height) override;
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
+
+  private:
+      QOpenGLContext *context;
 };
 
 #endif // NORMALSELECTORWIDGET_H

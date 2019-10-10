@@ -2,5 +2,6 @@
     <qresource prefix="/icons">
         <file>eraser-icon.png</file>
         <file>brush-icon.png</file>
+        <file>icon.png</file>
     </qresource>
 </RCC>
