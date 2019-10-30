@@ -1,11 +1,31 @@
 #include "normalbrushplugin.h"
 #include "normalbrushgui.h"
+#include <algorithm>
 #include <QDebug>
 #include <QRadialGradient>
+#include <QtConcurrent/QtConcurrent>
 
 void NormalBrushPlugin::setImages(QImage *normal){
   m_normal = normal;
   normalColor = QColor(127,127,255);
+}
+
+void NormalBrushPlugin::drawAt(QPoint point, QPainter *p){
+  QRadialGradient gradient(point, radius);
+  normalColor = gui->get_normal();
+  gradient.setColorAt(0,normalColor);
+  normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
+  gradient.setColorAt(hardness,normalColor);
+  if (hardness != 1){
+    normalColor.setAlphaF(0);
+    gradient.setColorAt(1,normalColor);
+  }
+
+  QBrush brush(gradient);
+  p->setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
+                 Qt::MiterJoin));
+
+  p->drawEllipse(point.x()-radius/2,point.y()-radius/2,radius,radius);
 }
 
 void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
@@ -13,18 +33,31 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
   if (!selected)
     return;
 
+
+  int w = m_processor->get_texture()->width();
+  int h = m_processor->get_texture()->height();
+
+  bool tilex = m_processor->get_tile_x();
+  bool tiley = m_processor->get_tile_y();
+
+  QPoint in(oldPos);
+  QPoint fi(newPos);
+
+  int xmin = std::min(in.x(),fi.x());
+  int xmax = std::max(in.x(),fi.x());
+
+  int ymin = std::min(in.y(),fi.y());
+  int ymax = std::max(in.y(),fi.y());
+
   if (brushSelected){
 
     QRect rect = m_processor->get_texture()->rect();
-    if (!rect.contains(oldPos) && !rect.contains(newPos))
-      return;
 
     QPainter p(&auxNormal);
     QImage g(radius,radius,QImage::Format_RGBA8888_Premultiplied);
 
     if (!linesSelected){
-
-      QRadialGradient gradient(newPos, radius);
+      QRadialGradient gradient(fi, radius);
       normalColor = gui->get_normal();
       gradient.setColorAt(0,normalColor);
       normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
@@ -40,34 +73,82 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
         p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
                       Qt::MiterJoin));
 
-      p.drawEllipse(newPos.x()-radius/2,newPos.y()-radius/2,radius,radius);
+      QPoint point(fi.x()-radius/2, fi.y()-radius/2);
+
+      if (tilex){
+        point.setX(point.x() % w);
+      }
+      if (tiley){
+        point.setY(point.y() % h);
+      }
+
+      if (tilex){
+        if (point.x() + radius >= w){
+          drawAt(QPoint(point.x()-w,point.y()),&p);
+        } else if (point.x() - radius <= 0){
+          drawAt(QPoint(point.x() + w, point.y()), &p);
+        }
+      }
+
+      if (tiley){
+        if (point.y() + radius >= h){
+          drawAt(QPoint(point.x(),point.y()-h),&p);
+        } else if (point.y() - radius <= 0){
+          drawAt(QPoint(point.x(), point.y()+h), &p);
+        }
+      }
+
+      drawAt(point, &p);
     }else{
 
       QPainterPath path;
-      path.moveTo(oldPos);
-      path.lineTo(newPos);
+      path.moveTo(in);
+      path.lineTo(fi);
       qreal length = path.length();
-      qreal pos = radius/4;
+      qreal pos = 0;
+
 
       while (pos < length) {
         qreal percent = path.percentAtLength(pos);
         QPoint point = path.pointAtPercent(percent).toPoint();
 
-        QRadialGradient gradient(point, radius);
-        normalColor = gui->get_normal();
-        gradient.setColorAt(0,normalColor);
-        normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
-        gradient.setColorAt(hardness,normalColor);
-        if (hardness != 1){
-          normalColor.setAlphaF(0);
-          gradient.setColorAt(1,normalColor);
+        if (tilex){
+          point.setX(point.x() % w);
+          xmin = std::min(xmin,point.x());
+          xmax = std::max(xmax,point.x());
+        }
+        if (tiley){
+          point.setY(point.y() % h);
+          ymin = std::min(ymin,point.y());
+          ymax = std::max(ymax,point.y());
         }
 
-        QBrush brush(gradient);
-        p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
-                      Qt::MiterJoin));
+        if (tilex){
+          if (point.x() + radius >= w){
+            drawAt(QPoint(point.x()-w,point.y()),&p);
+            xmax = w;
+            xmin = 0;
+          } else if (point.x() - radius <= 0){
+            drawAt(QPoint(point.x() + w, point.y()), &p);
+            xmax = w;
+            xmin = 0;
 
-        p.drawEllipse(point.x()-radius/2,point.y()-radius/2,radius,radius);
+          }
+        }
+
+        if (tiley){
+          if (point.y() + radius >= h){
+            drawAt(QPoint(point.x(),point.y()-h),&p);
+            ymax = h;
+            ymin = 0;
+          } else if (point.y() - radius <= 0){
+            drawAt(QPoint(point.x(), point.y()+h), &p);
+            ymax = h;
+            ymin = 0;
+          }
+        }
+
+        drawAt(point,&p);
         pos += radius/4.0;
       }
     }
@@ -77,35 +158,26 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     QPoint topLeft;
     QPoint botRight;
 
-    if (oldPos.x() > newPos.x()){
-      botRight.setX(oldPos.x());
-      topLeft.setX(newPos.x());
-    } else {
-      botRight.setX(newPos.x());
-      topLeft.setX(oldPos.x());
-    }
+    topLeft = QPoint(xmin,ymin);
+    botRight = QPoint(xmax,ymax);
 
-    if (oldPos.y() > newPos.y()){
-      botRight.setY(oldPos.y());
-      topLeft.setY(newPos.y());
-    } else {
-      botRight.setY(newPos.y());
-      topLeft.setY(oldPos.y());
-    }
+    xmin -= radius;
+    ymin -= radius;
+    xmax += radius;
+    ymax += radius;
 
-    int xi,xf,yi,yf;
+    ymin = ymin < 0 ? 0 : ymin;
+   // ymin = ymin > overlay->height() ? overlay->height() : ymin;
+   // ymax = ymax < 0 ? 0 : ymax;
+    ymax = ymax > overlay->height() ? overlay->height() : ymax;
 
-    rect = QRect(topLeft-QPoint(radius,radius),botRight+QPoint(radius,radius));
-    rect.getCoords(&xi,&yi,&xf,&yf);
+    xmin = xmin < 0 ? 0 : xmin;
+   // xmin = xmin > overlay->height() ? overlay->width() : xmin;
+   // xmax = xmax < 0 ? 0 : xmax;
+    xmax = xmax > overlay->height() ? overlay->width() : xmax;
 
-    yi = yi < 0 ? 0 : yi;
-    yf = yf > overlay->height() ? overlay->height() : yf;
-
-    xi = xi < 0 ? 0 : xi;
-    xf = xf > overlay->height() ? overlay->width() : xf;
-
-    for (int x = xi; x < xf; x++){
-      for (int y = yi; y < yf; y++){
+    for (int x = xmin; x < xmax; x++){
+      for (int y =ymin; y < ymax; y++){
         QColor oldColor = oldNormal.pixelColor(x,y);
         QColor auxColor = auxNormal.pixelColor(x,y);
         QColor newColor(0,0,0,0);
@@ -140,7 +212,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     pen.setJoinStyle(Qt::MiterJoin);
     p.setPen(pen);
     p.setRenderHint(QPainter::Antialiasing, true);
-    p.drawLine(oldPos,newPos);
+    p.drawLine(in,fi);
 
     for (int x=0; x < overlay->width(); x++){
       for (int y=0; y < overlay->height(); y++){
@@ -151,7 +223,18 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     }
 
   }
-  m_processor->generate_normal_map();
+  //}
+  //  }
+
+  xmin = std::min(in.x(),fi.x());
+  xmax = std::max(in.x(),fi.x());
+
+  ymin = std::min(in.y(),fi.y());
+  ymax = std::max(in.y(),fi.y());
+
+  QRect r(QPoint(xmin-radius,ymin-radius),QPoint(xmax+radius,ymax+radius));
+
+  QtConcurrent::run(m_processor,&ImageProcessor::generate_normal_map,false,false,false,r);
 }
 
 void NormalBrushPlugin::mousePress(const QPoint &pos){
@@ -180,7 +263,6 @@ QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
   connect(gui,SIGNAL(brushSelected_changed(bool)),this,SLOT(set_brushSelected(bool)));
   connect(gui,SIGNAL(eraserSelected_changed(bool)),this,SLOT(set_eraserSelected(bool)));
   radius = 10;
-  //gui->show();
   return gui;
 }
 

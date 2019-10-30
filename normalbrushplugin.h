@@ -24,6 +24,7 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   void setProcessor(ImageProcessor *processor) override;
   QIcon getIcon() override;
   QString getName() override;
+  void drawAt(QPoint point, QPainter *p);
 
   public slots:
   void set_radius(int r);
