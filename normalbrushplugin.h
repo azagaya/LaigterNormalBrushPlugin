@@ -20,8 +20,10 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   void mousePress(const QPoint &pos) override;
   void mouseMove(const QPoint &oldPos, const QPoint &newPos) override;
   void mouseRelease(const QPoint &pos) override;
+  bool get_selected() override;
+  void set_selected(bool s) override;
   QWidget *loadGUI(QWidget *parent = nullptr) override;
-  void setProcessor(ImageProcessor *processor) override;
+  void setProcessor(ImageProcessor **processor) override;
   QIcon getIcon() override;
   QString getName() override;
   void drawAt(QPoint point, QPainter *p);
@@ -40,11 +42,12 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   int radius;
   QColor normalColor;
   NormalBrushGui *gui;
+  ImageProcessor **processorPtr;
   ImageProcessor *m_processor;
   float alpha = 0.8;
   float hardness = 0.8;
 
-  bool linesSelected = true, brushSelected = true, eraserSelected = false, selected = true;
+  bool linesSelected = true, brushSelected = false, eraserSelected = false, selected = false;
   QString m_name = tr("Normal Brush Plugin");
 };
 

@@ -24,6 +24,7 @@ class NormalBrushGui : public QWidget
 
   public:
   explicit NormalBrushGui(QWidget *parent = nullptr);
+  void unselect_all();
   ~NormalBrushGui();
 
   QColor get_normal();

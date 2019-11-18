@@ -22,33 +22,30 @@ QColor NormalBrushGui::get_normal(){
 
 void NormalBrushGui::on_buttonBrush_toggled(bool checked)
 {
+  brushSelected_changed(checked);
   if (checked){
-    brushSelected_changed(true);
-    selected_changed(true);
     eraserSelected_changed(false);
     ui->buttonEraser->setChecked(false);
-  }else{
-    if (!ui->buttonEraser->isChecked()){
-      selected_changed(false);
-    }
   }
 }
 
 void NormalBrushGui::on_buttonEraser_toggled(bool checked)
 {
+  eraserSelected_changed(checked);
   if (checked){
-    eraserSelected_changed(true);
-    selected_changed(true);
     brushSelected_changed(false);
     ui->buttonBrush->setChecked(false);
-  }else{
-    if (!ui->buttonBrush->isChecked()){
-      selected_changed(false);
-    }
+  } else {
+
   }
 }
 
 void NormalBrushGui::on_radioLines_toggled(bool checked)
 {
   lineSelected_changed(checked);
+}
+
+void NormalBrushGui::unselect_all(){
+  ui->buttonBrush->setChecked(false);
+  ui->buttonEraser->setChecked(false);
 }

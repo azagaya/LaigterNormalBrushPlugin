@@ -30,6 +30,8 @@ void NormalBrushPlugin::drawAt(QPoint point, QPainter *p){
 
 void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
 
+  m_processor = *processorPtr;
+
   if (!selected)
     return;
 
@@ -167,14 +169,14 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     ymax += radius;
 
     ymin = ymin < 0 ? 0 : ymin;
-   // ymin = ymin > overlay->height() ? overlay->height() : ymin;
-   // ymax = ymax < 0 ? 0 : ymax;
+    ymin = ymin > overlay->height() ? overlay->height() : ymin;
+    ymax = ymax < 0 ? 0 : ymax;
     ymax = ymax > overlay->height() ? overlay->height() : ymax;
 
     xmin = xmin < 0 ? 0 : xmin;
-   // xmin = xmin > overlay->height() ? overlay->width() : xmin;
-   // xmax = xmax < 0 ? 0 : xmax;
-    xmax = xmax > overlay->height() ? overlay->width() : xmax;
+    xmin = xmin > overlay->width() ? overlay->width() : xmin;
+    xmax = xmax < 0 ? 0 : xmax;
+    xmax = xmax > overlay->width() ? overlay->width() : xmax;
 
     for (int x = xmin; x < xmax; x++){
       for (int y =ymin; y < ymax; y++){
@@ -238,6 +240,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
 }
 
 void NormalBrushPlugin::mousePress(const QPoint &pos){
+  m_processor = *processorPtr;
   QImage *overlay = m_processor->get_normal_overlay();
   oldNormal = QImage(overlay->width(),overlay->height(),QImage::Format_RGBA8888_Premultiplied);
   oldNormal = *overlay;
@@ -249,8 +252,8 @@ void NormalBrushPlugin::mouseRelease(const QPoint &pos){
 
 }
 
-void NormalBrushPlugin::setProcessor(ImageProcessor *processor){
-  m_processor = processor;
+void NormalBrushPlugin::setProcessor(ImageProcessor **processor){
+  processorPtr = processor;
 }
 
 QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
@@ -288,10 +291,14 @@ void NormalBrushPlugin::set_lineSelected(bool l){
 
 void NormalBrushPlugin::set_eraserSelected(bool e){
   eraserSelected = e;
+  if (e && !selected) set_selected(e);
+  else if (!e && !brushSelected) set_selected(e);
 }
 
 void NormalBrushPlugin::set_brushSelected(bool b){
   brushSelected = b;
+  if (b && !selected) set_selected(b);
+  else if (!b && !eraserSelected) set_selected(b);
 }
 
 QIcon NormalBrushPlugin::getIcon(){
@@ -300,4 +307,15 @@ QIcon NormalBrushPlugin::getIcon(){
 
 QString NormalBrushPlugin::getName(){
   return m_name;
+}
+
+bool NormalBrushPlugin::get_selected(){
+  return selected;
+}
+
+void NormalBrushPlugin::set_selected(bool s){
+  selected = s;
+  if (!s){
+    gui->unselect_all();
+  }
 }
