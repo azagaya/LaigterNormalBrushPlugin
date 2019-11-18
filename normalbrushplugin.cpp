@@ -56,7 +56,6 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     QRect rect = m_processor->get_texture()->rect();
 
     QPainter p(&auxNormal);
-    QImage g(radius,radius,QImage::Format_RGBA8888_Premultiplied);
 
     if (!linesSelected){
       QRadialGradient gradient(fi, radius);
@@ -253,10 +252,12 @@ void NormalBrushPlugin::mouseRelease(const QPoint &pos){
 }
 
 void NormalBrushPlugin::setProcessor(ImageProcessor **processor){
+
   processorPtr = processor;
 }
 
 QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
+
   gui = new NormalBrushGui(parent);
   connect(gui,SIGNAL(radius_changed(int)),this,SLOT(set_radius(int)));
   connect(gui,SIGNAL(normal_changed(QColor)),this,SLOT(set_normal(QColor)));
@@ -269,7 +270,7 @@ QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
   return gui;
 }
 
-void NormalBrushPlugin::set_radius(int r){
+void NormalBrushPlugin::set_radius(int r){  
   radius = r;
 }
 
@@ -318,4 +319,14 @@ void NormalBrushPlugin::set_selected(bool s){
   if (!s){
     gui->unselect_all();
   }
+}
+
+QImage NormalBrushPlugin::getBrushSprite(){
+  return brushSprite;
+}
+
+void NormalBrushPlugin::updateBrushSprite(){
+  brushSprite = QImage(2*radius,2*radius,QImage::Format_RGBA8888);
+  QPainter p(&brushSprite);
+  drawAt(QPoint(radius,radius), &p);
 }
