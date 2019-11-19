@@ -75,28 +75,40 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
         p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
                       Qt::MiterJoin));
 
-      QPoint point(fi.x()-radius/2, fi.y()-radius/2);
+      QPoint point(fi.x(), fi.y());
 
       if (tilex){
         point.setX(point.x() % w);
+        xmin = std::min(xmin,point.x());
+        xmax = std::max(xmax,point.x());
       }
       if (tiley){
         point.setY(point.y() % h);
+        ymin = std::min(ymin,point.y());
+        ymax = std::max(ymax,point.y());
       }
 
       if (tilex){
         if (point.x() + radius >= w){
           drawAt(QPoint(point.x()-w,point.y()),&p);
+          xmax = w;
+          xmin = 0;
         } else if (point.x() - radius <= 0){
           drawAt(QPoint(point.x() + w, point.y()), &p);
+          xmax = w;
+          xmin = 0;
         }
       }
 
       if (tiley){
         if (point.y() + radius >= h){
           drawAt(QPoint(point.x(),point.y()-h),&p);
+          ymax = h;
+          ymin = 0;
         } else if (point.y() - radius <= 0){
           drawAt(QPoint(point.x(), point.y()+h), &p);
+          ymax = h;
+          ymin = 0;
         }
       }
 
