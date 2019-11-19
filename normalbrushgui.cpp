@@ -9,6 +9,7 @@ NormalBrushGui::NormalBrushGui(QWidget *parent) :
   connect(ui->sliderRadius,SIGNAL(valueChanged(int)),this, SIGNAL(radius_changed(int)));
   connect(ui->sliderMix,SIGNAL(valueChanged(int)),this, SIGNAL(mix_changed(int)));
   connect(ui->sliderHardness,SIGNAL(valueChanged(int)),this,SIGNAL(hardness_changed(int)));
+  connect(ui->normalSelectorWidget, SIGNAL(normal_changed(QColor)), this, SIGNAL(normal_changed(QColor)));
 }
 
 NormalBrushGui::~NormalBrushGui()

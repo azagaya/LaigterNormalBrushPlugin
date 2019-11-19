@@ -244,6 +244,7 @@ void NormalSelectorWidget::mousePressEvent(QMouseEvent *event) {
   p = QVector2D(event->localPos().x()/width()*2-1,-event->localPos().y()/height()*2+1);
   c = rendered.pixelColor(event->localPos().x(),event->localPos().y());
   update();
+  this->normal_changed(c);
 }
 
 void NormalSelectorWidget::mouseMoveEvent(QMouseEvent *event) {
@@ -251,6 +252,7 @@ void NormalSelectorWidget::mouseMoveEvent(QMouseEvent *event) {
   if (p.x()<=-1 || p.x() >= 1 || p.y() <= -1 || p.y() >= 1) return;
   c = rendered.pixelColor(event->localPos().x(),event->localPos().y());
   update();
+  this->normal_changed(c);
 }
 
 QColor NormalSelectorWidget::get_normal(){

@@ -272,18 +272,22 @@ QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
 
 void NormalBrushPlugin::set_radius(int r){  
   radius = r;
+  updateBrushSprite();
 }
 
 void NormalBrushPlugin::set_hardness(int h){
   hardness = h/100.0;
+  updateBrushSprite();
 }
 
 void NormalBrushPlugin::set_normal(QColor n){
   normalColor = n;
+  updateBrushSprite();
 }
 
 void NormalBrushPlugin::set_mix(int m){
   alpha = m/100.0;
+  updateBrushSprite();
 }
 
 void NormalBrushPlugin::set_lineSelected(bool l){
@@ -327,6 +331,8 @@ QImage NormalBrushPlugin::getBrushSprite(){
 
 void NormalBrushPlugin::updateBrushSprite(){
   brushSprite = QImage(2*radius,2*radius,QImage::Format_RGBA8888);
+  brushSprite.fill(0.0);
   QPainter p(&brushSprite);
   drawAt(QPoint(radius,radius), &p);
+  brushSprite.save("brush.png");
 }

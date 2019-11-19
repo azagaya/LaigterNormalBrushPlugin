@@ -11,6 +11,7 @@
 
 class NormalSelectorWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
+  Q_OBJECT
   public:
   NormalSelectorWidget(QWidget *parent = nullptr);
   QColor get_normal();
@@ -25,6 +26,9 @@ class NormalSelectorWidget : public QOpenGLWidget, protected QOpenGLFunctions
   QImage rendered;
   bool updated = false;
 
+  signals:
+  void normal_changed(QColor n);
+
   protected:
   void initializeGL() override ;
   void paintGL() override;
@@ -33,7 +37,7 @@ class NormalSelectorWidget : public QOpenGLWidget, protected QOpenGLFunctions
   void mouseMoveEvent(QMouseEvent *event) override;
 
   private:
-      QOpenGLContext *context;
+  QOpenGLContext *context;
 };
 
 #endif // NORMALSELECTORWIDGET_H
