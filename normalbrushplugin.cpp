@@ -10,11 +10,12 @@ void NormalBrushPlugin::setImages(QImage *normal){
   normalColor = QColor(127,127,255);
 }
 
-void NormalBrushPlugin::drawAt(QPoint point, QPainter *p){
+void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod){
   QRadialGradient gradient(point, radius);
   normalColor = gui->get_normal();
+  normalColor.setAlphaF(normalColor.alphaF()*alpha_mod);
   gradient.setColorAt(0,normalColor);
-  normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
+  normalColor.setAlphaF(pow(0.5+hardness*0.5,2)*alpha_mod);
   gradient.setColorAt(hardness,normalColor);
   if (hardness != 1){
     normalColor.setAlphaF(0);
@@ -267,6 +268,7 @@ QWidget *NormalBrushPlugin::loadGUI(QWidget *parent){
   connect(gui,SIGNAL(brushSelected_changed(bool)),this,SLOT(set_brushSelected(bool)));
   connect(gui,SIGNAL(eraserSelected_changed(bool)),this,SLOT(set_eraserSelected(bool)));
   radius = 10;
+  updateBrushSprite();
   return gui;
 }
 
@@ -333,6 +335,5 @@ void NormalBrushPlugin::updateBrushSprite(){
   brushSprite = QImage(2*radius,2*radius,QImage::Format_RGBA8888);
   brushSprite.fill(0.0);
   QPainter p(&brushSprite);
-  drawAt(QPoint(radius,radius), &p);
-  brushSprite.save("brush.png");
+  drawAt(QPoint(radius,radius), &p, alpha);
 }
