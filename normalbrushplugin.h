@@ -28,6 +28,7 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   QString getName() override;
   QImage getBrushSprite() override;
   void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0);
+  void updateOverlay(int xmin, int xmax, int ymin, int ymax);
   void updateBrushSprite();
 
   public slots:

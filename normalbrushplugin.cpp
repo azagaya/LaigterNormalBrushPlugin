@@ -10,6 +10,58 @@ void NormalBrushPlugin::setImages(QImage *normal){
   normalColor = QColor(127,127,255);
 }
 
+void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
+  QImage *overlay = m_processor->get_normal_overlay();
+
+  QPoint topLeft;
+  QPoint botRight;
+
+  topLeft = QPoint(xmin,ymin);
+  botRight = QPoint(xmax,ymax);
+
+  xmin -= radius;
+  ymin -= radius;
+  xmax += radius;
+  ymax += radius;
+
+  ymin = ymin < 0 ? 0 : ymin;
+  ymin = ymin > overlay->height() ? overlay->height() : ymin;
+  ymax = ymax < 0 ? 0 : ymax;
+  ymax = ymax > overlay->height() ? overlay->height() : ymax;
+
+  xmin = xmin < 0 ? 0 : xmin;
+  xmin = xmin > overlay->width() ? overlay->width() : xmin;
+  xmax = xmax < 0 ? 0 : xmax;
+  xmax = xmax > overlay->width() ? overlay->width() : xmax;
+
+  for (int x = xmin; x < xmax; x++){
+    for (int y =ymin; y < ymax; y++){
+      QColor oldColor = oldNormal.pixelColor(x,y);
+      QColor auxColor = auxNormal.pixelColor(x,y);
+      QColor newColor(0,0,0,0);
+
+      if (auxColor.alphaF() <= 0.05 || m_processor->get_texture()->pixelColor(x,y).alphaF() == 0){
+        newColor = oldColor;
+      } else {
+
+        float outA = alpha*auxColor.alphaF()+oldColor.alphaF()*(1-alpha*auxColor.alphaF());
+        int r = auxColor.red()*alpha*auxColor.alphaF()+oldColor.red()*oldColor.alphaF()*(1-alpha*auxColor.alphaF ());
+
+        int g = auxColor.green()*alpha*auxColor.alphaF()+oldColor.green()*oldColor.alphaF()*(1-alpha*auxColor.alphaF());
+
+        int b = auxColor.blue()*alpha*auxColor.alphaF()+oldColor.blue()*oldColor.alphaF()*(1-alpha*auxColor.alphaF());
+
+        newColor = QColor(r,g,b);
+        newColor.setAlphaF(outA);
+
+      }
+
+
+      overlay->setPixelColor(x,y,newColor);
+    }
+  }
+}
+
 void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod){
   QRadialGradient gradient(point, radius);
   normalColor = gui->get_normal();
@@ -167,55 +219,8 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
       }
     }
 
-    QImage *overlay = m_processor->get_normal_overlay();
+    updateOverlay(xmin, xmax, ymin, ymax);
 
-    QPoint topLeft;
-    QPoint botRight;
-
-    topLeft = QPoint(xmin,ymin);
-    botRight = QPoint(xmax,ymax);
-
-    xmin -= radius;
-    ymin -= radius;
-    xmax += radius;
-    ymax += radius;
-
-    ymin = ymin < 0 ? 0 : ymin;
-    ymin = ymin > overlay->height() ? overlay->height() : ymin;
-    ymax = ymax < 0 ? 0 : ymax;
-    ymax = ymax > overlay->height() ? overlay->height() : ymax;
-
-    xmin = xmin < 0 ? 0 : xmin;
-    xmin = xmin > overlay->width() ? overlay->width() : xmin;
-    xmax = xmax < 0 ? 0 : xmax;
-    xmax = xmax > overlay->width() ? overlay->width() : xmax;
-
-    for (int x = xmin; x < xmax; x++){
-      for (int y =ymin; y < ymax; y++){
-        QColor oldColor = oldNormal.pixelColor(x,y);
-        QColor auxColor = auxNormal.pixelColor(x,y);
-        QColor newColor(0,0,0,0);
-
-        if (auxColor.alphaF() <= 0.05 || m_processor->get_texture()->pixelColor(x,y).alphaF() == 0){
-          newColor = oldColor;
-        } else {
-
-          float outA = alpha*auxColor.alphaF()+oldColor.alphaF()*(1-alpha*auxColor.alphaF());
-          int r = auxColor.red()*alpha*auxColor.alphaF()+oldColor.red()*oldColor.alphaF()*(1-alpha*auxColor.alphaF ());
-
-          int g = auxColor.green()*alpha*auxColor.alphaF()+oldColor.green()*oldColor.alphaF()*(1-alpha*auxColor.alphaF());
-
-          int b = auxColor.blue()*alpha*auxColor.alphaF()+oldColor.blue()*oldColor.alphaF()*(1-alpha*auxColor.alphaF());
-
-          newColor = QColor(r,g,b);
-          newColor.setAlphaF(outA);
-
-        }
-
-
-        overlay->setPixelColor(x,y,newColor);
-      }
-    }
   } else {
     QImage *overlay = m_processor->get_normal_overlay();
     QPainter p(&auxNormal);
@@ -258,6 +263,64 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
   oldNormal = *overlay;
   auxNormal = QImage(oldNormal.width(), oldNormal.height(), QImage::Format_RGBA8888_Premultiplied);
   auxNormal.fill(QColor(0,0,0,0));
+
+  /* Draw the point */
+  QPoint fi(pos);
+  QPainter p(&auxNormal);
+
+  int w = m_processor->get_texture()->width();
+  int h = m_processor->get_texture()->height();
+
+  bool tilex = m_processor->get_tile_x();
+  bool tiley = m_processor->get_tile_y();
+
+  QRadialGradient gradient(fi, radius);
+  normalColor = gui->get_normal();
+  gradient.setColorAt(0,normalColor);
+  normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
+  gradient.setColorAt(hardness,normalColor);
+  if (hardness != 1){
+    normalColor.setAlphaF(0);
+    gradient.setColorAt(1,normalColor);
+  }
+
+  QBrush brush(gradient);
+  p.setRenderHint(QPainter::Antialiasing, true);
+  if (brushSelected)
+    p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
+                  Qt::MiterJoin));
+
+  QPoint point(fi.x(), fi.y());
+
+  if (tilex){
+    point.setX(point.x() % w);
+  }
+  if (tiley){
+    point.setY(point.y() % h);
+  }
+
+  if (tilex){
+    if (point.x() + radius >= w){
+      drawAt(QPoint(point.x()-w,point.y()),&p);
+    } else if (point.x() - radius <= 0){
+      drawAt(QPoint(point.x() + w, point.y()), &p);
+    }
+  }
+
+  if (tiley){
+    if (point.y() + radius >= h){
+      drawAt(QPoint(point.x(),point.y()-h),&p);
+    } else if (point.y() - radius <= 0){
+      drawAt(QPoint(point.x(), point.y()+h), &p);
+    }
+  }
+
+  drawAt(point, &p);
+  updateOverlay(fi.x()-radius, fi.x()+radius, fi.y()-radius, fi.y()+radius);
+
+  QRect r(QPoint(fi.x()-radius,fi.y()-radius),QPoint(fi.x()+radius,fi.y()+radius));
+
+  QtConcurrent::run(m_processor,&ImageProcessor::generate_normal_map,false,false,false,r);
 }
 
 void NormalBrushPlugin::mouseRelease(const QPoint &pos){
