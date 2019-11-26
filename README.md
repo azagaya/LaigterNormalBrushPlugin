@@ -33,6 +33,8 @@ target.path = /home/azagaya/.local/share/laigter/plugins/
 ```
 Include paths should be modified to the source code of laigter. Destdir should be changed to where you want to put the binaries.
 
+Also, binaries should be moved to the application data folder in your system for Laigter to find them, until i make an "Install Plugin" button.
+
 ## Methods of brush plugin
 
 All plugins should be made with same interface, and for that, this methods must be present.
