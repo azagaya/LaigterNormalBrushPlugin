@@ -6,19 +6,19 @@ INCLUDEPATH  += ../laigter/src/
 DESTDIR       = /home/azagaya/.local/share/laigter/plugins/
 
 HEADERS += \
-  normalbrushgui.h \
-  normalbrushplugin.h \
-  normalselectorwidget.h \
+  src/normalbrushgui.h \
+  src/normalbrushplugin.h \
+  src/normalselectorwidget.h \
   ../laigter/src/imageprocessor.h\
 
 SOURCES += \
-  normalbrushgui.cpp \
-  normalbrushplugin.cpp \
-  normalselectorwidget.cpp \
+  src/normalbrushgui.cpp \
+  src/normalbrushplugin.cpp \
+  src/normalselectorwidget.cpp \
   ../laigter/src/imageprocessor.cpp\
 
 FORMS += \
-  normalbrushgui.ui
+  src/normalbrushgui.ui
 
 target.path = /home/azagaya/.local/share/laigter/plugins/
 INSTALLS += target
@@ -27,8 +27,8 @@ CONFIG += install_ok  # Do not cargo-cult this!
 uikit: CONFIG += debug_and_release
 
 DISTFILES += \
-  sphere_fragment.glsl \
-  sphere_vertex.glsl
+  shaders/sphere_fragment.glsl \
+  shaders/sphere_vertex.glsl
 
 RESOURCES += \
   icons.qrc \

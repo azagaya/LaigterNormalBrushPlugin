@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>eraser-icon.png</file>
-        <file>brush-icon.png</file>
-        <file>icon.png</file>
+        <file>icons/brush-icon.png</file>
+        <file>icons/eraser-icon.png</file>
+        <file>icons/icon.png</file>
     </qresource>
 </RCC>
