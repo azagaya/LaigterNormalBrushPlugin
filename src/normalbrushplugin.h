@@ -16,7 +16,6 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   Q_INTERFACES(BrushInterface)
 
   public:
-  void setImages(QImage *normal) override;
   void mousePress(const QPoint &pos) override;
   void mouseMove(const QPoint &oldPos, const QPoint &newPos) override;
   void mouseRelease(const QPoint &pos) override;

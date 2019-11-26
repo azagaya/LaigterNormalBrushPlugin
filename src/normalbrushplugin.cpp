@@ -5,10 +5,6 @@
 #include <QRadialGradient>
 #include <QtConcurrent/QtConcurrent>
 
-void NormalBrushPlugin::setImages(QImage *normal){
-  m_normal = normal;
-  normalColor = QColor(127,127,255);
-}
 
 void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
   QImage *overlay = m_processor->get_normal_overlay();
