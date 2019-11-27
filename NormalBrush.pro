@@ -8,13 +8,15 @@ HEADERS += \
   src/normalbrushgui.h \
   src/normalbrushplugin.h \
   src/normalselectorwidget.h \
-  ../laigter/src/imageprocessor.h\
+  ../laigter/src/imageprocessor.h \
+  ../laigter/src/lightsource.h\
 
 SOURCES += \
   src/normalbrushgui.cpp \
   src/normalbrushplugin.cpp \
   src/normalselectorwidget.cpp \
   ../laigter/src/imageprocessor.cpp\
+  ../laigter/src/lightsource.cpp \
 
 FORMS += \
   src/normalbrushgui.ui
