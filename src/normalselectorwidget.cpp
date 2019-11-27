@@ -67,9 +67,9 @@ void NormalSelectorWidget::initializeGL(){
       {
         float xSegment = (float)x / (float)X_SEGMENTS;
         float ySegment = (float)y / (float)Y_SEGMENTS;
-        float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-        float yPos = std::cos(ySegment * PI);
-        float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+        float xPos = cos(xSegment * 2.0f * PI) * sin(ySegment * PI);
+        float yPos = cos(ySegment * PI);
+        float zPos = sin(xSegment * 2.0f * PI) * sin(ySegment * PI);
 
         positions.push_back(QVector3D(xPos, yPos, zPos));
         uv.push_back(QVector2D(xSegment, ySegment));

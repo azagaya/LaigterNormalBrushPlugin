@@ -3,7 +3,6 @@ CONFIG       += plugin
 QT           += widgets
 INCLUDEPATH  += ../laigter/
 INCLUDEPATH  += ../laigter/src/
-DESTDIR       = /home/azagaya/.local/share/laigter/plugins/
 
 HEADERS += \
   src/normalbrushgui.h \
@@ -20,9 +19,6 @@ SOURCES += \
 FORMS += \
   src/normalbrushgui.ui
 
-target.path = /home/azagaya/.local/share/laigter/plugins/
-INSTALLS += target
-
 CONFIG += install_ok  # Do not cargo-cult this!
 uikit: CONFIG += debug_and_release
 
@@ -33,3 +29,17 @@ DISTFILES += \
 RESOURCES += \
   icons.qrc \
   shaders.qrc
+
+unix{
+    CONFIG += link_pkgconfig
+    packagesExist(opencv4){
+        PKGCONFIG += opencv4
+        DEFINES += CV_RGBA2GRAY=COLOR_RGBA2GRAY
+        DEFINES += CV_RGB2GRAY=COLOR_RGB2GRAY
+        DEFINES += CV_GRAY2RGB=COLOR_GRAY2RGB
+        DEFINES += CV_GRAY2RGBA=COLOR_GRAY2RGBA
+        DEFINES += CV_DIST_L2=DIST_L2
+    } else {
+        PKGCONFIG += opencv
+    }
+}
