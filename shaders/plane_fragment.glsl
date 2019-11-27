@@ -1,4 +1,4 @@
-in vec2 TexCoord;
+varying vec2 TexCoord;
 
 uniform vec4 color;
 

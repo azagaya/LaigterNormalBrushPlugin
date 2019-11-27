@@ -1,5 +1,5 @@
-in vec2 TexCoords;
-in vec3 Normal;
+varying vec2 TexCoords;
+varying vec3 Normal;
 
 uniform vec3 camPos;
 

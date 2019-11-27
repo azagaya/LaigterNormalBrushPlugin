@@ -1,6 +1,6 @@
-in vec3 aPos;
-in vec2 aTexCoords;
-in vec3 aNormal;
+attribute vec3 aPos;
+attribute vec2 aTexCoords;
+attribute vec3 aNormal;
 
 varying vec2 TexCoords;
 varying vec3 Normal;
