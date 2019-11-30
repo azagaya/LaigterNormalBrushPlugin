@@ -41,11 +41,11 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
       } else {
 
         float outA = alpha*auxColor.alphaF()+oldColor.alphaF()*(1-alpha*auxColor.alphaF());
-        int r = auxColor.red()*alpha*auxColor.alphaF()+oldColor.red()*oldColor.alphaF()*(1-alpha*auxColor.alphaF ());
+        int r = auxColor.red()*alpha*auxColor.alphaF()/outA+oldColor.red()*oldColor.alphaF()*(1-alpha*auxColor.alphaF())/outA;
 
-        int g = auxColor.green()*alpha*auxColor.alphaF()+oldColor.green()*oldColor.alphaF()*(1-alpha*auxColor.alphaF());
+        int g = auxColor.green()*alpha*auxColor.alphaF()/outA+oldColor.green()*oldColor.alphaF()*(1-alpha*auxColor.alphaF())/outA;
 
-        int b = auxColor.blue()*alpha*auxColor.alphaF()+oldColor.blue()*oldColor.alphaF()*(1-alpha*auxColor.alphaF());
+        int b = auxColor.blue()*alpha*auxColor.alphaF()/outA+oldColor.blue()*oldColor.alphaF()*(1-alpha*auxColor.alphaF())/outA;
 
         newColor = QColor(r,g,b);
         newColor.setAlphaF(outA);
