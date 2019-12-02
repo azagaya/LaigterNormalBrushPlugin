@@ -36,7 +36,7 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
       QColor auxColor = auxNormal.pixelColor(x,y);
       QColor newColor(0,0,0,0);
 
-      if (auxColor.alphaF() <= 0.05 || m_processor->get_texture()->pixelColor(x,y).alphaF() == 0){
+      if (auxColor.alphaF() <= 1e-6 || m_processor->get_texture()->pixelColor(x,y).alphaF() == 0){
         newColor = oldColor;
       } else {
 
