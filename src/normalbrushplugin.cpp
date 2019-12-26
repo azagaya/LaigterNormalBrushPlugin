@@ -396,6 +396,7 @@ void NormalBrushPlugin::set_selected(bool s){
   if (!s){
     gui->unselect_all();
   }
+  selected_changed(this);
 }
 
 QImage NormalBrushPlugin::getBrushSprite(){
@@ -407,4 +408,7 @@ void NormalBrushPlugin::updateBrushSprite(){
   brushSprite.fill(0.0);
   QPainter p(&brushSprite);
   drawAt(QPoint(radius,radius), &p, alpha);
+}
+QObject * NormalBrushPlugin::getObject(){
+  return this;
 }

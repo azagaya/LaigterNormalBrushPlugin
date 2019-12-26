@@ -9,7 +9,7 @@
 #include <imageprocessor.h>
 #include "src/normalbrushgui.h"
 #include "src/normalselectorwidget.h"
-class NormalBrushPlugin : public QWidget, public BrushInterface
+class NormalBrushPlugin : public QObject, public BrushInterface
 {
   Q_OBJECT
   Q_PLUGIN_METADATA(IID "org.azagaya.laigter.plugins.BrushInterface")
@@ -29,6 +29,9 @@ class NormalBrushPlugin : public QWidget, public BrushInterface
   void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0);
   void updateOverlay(int xmin, int xmax, int ymin, int ymax);
   void updateBrushSprite();
+  QObject * getObject() override;
+  signals:
+  void selected_changed(BrushInterface *brush);
 
   public slots:
   void set_radius(int r);
