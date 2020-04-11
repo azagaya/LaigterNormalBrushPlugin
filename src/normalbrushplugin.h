@@ -5,8 +5,8 @@
 #include <QWidget>
 #include <QIcon>
 
-#include <brushinterface.h>
-#include <imageprocessor.h>
+#include <brush_interface.h>
+#include <image_processor.h>
 #include "src/normalbrushgui.h"
 #include "src/normalselectorwidget.h"
 class NormalBrushPlugin : public QObject, public BrushInterface

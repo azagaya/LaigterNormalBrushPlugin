@@ -9,15 +9,19 @@ HEADERS += \
   src/normalbrushgui.h \
   src/normalbrushplugin.h \
   src/normalselectorwidget.h \
-  ../laigter/src/imageprocessor.h \
-  ../laigter/src/lightsource.h\
+  ../laigter/src/image_processor.h \
+  ../laigter/src/light_source.h\
+  ../laigter/src/texture.h \
+  ../laigter/src/sprite.h
 
 SOURCES += \
   src/normalbrushgui.cpp \
   src/normalbrushplugin.cpp \
   src/normalselectorwidget.cpp \
-  ../laigter/src/imageprocessor.cpp\
-  ../laigter/src/lightsource.cpp \
+  ../laigter/src/image_processor.cpp\
+  ../laigter/src/light_source.cpp \
+  ../laigter/src/texture.cpp \
+  ../laigter/src/sprite.cpp
 
 FORMS += \
   src/normalbrushgui.ui

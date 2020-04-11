@@ -7,7 +7,7 @@
 
 
 void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
-  QImage *overlay = m_processor->get_normal_overlay();
+  QImage overlay = m_processor->get_normal_overlay();
 
   QPoint topLeft;
   QPoint botRight;
@@ -21,14 +21,14 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
   ymax += radius;
 
   ymin = ymin < 0 ? 0 : ymin;
-  ymin = ymin > overlay->height() ? overlay->height() : ymin;
+  ymin = ymin > overlay.height() ? overlay.height() : ymin;
   ymax = ymax < 0 ? 0 : ymax;
-  ymax = ymax > overlay->height() ? overlay->height() : ymax;
+  ymax = ymax > overlay.height() ? overlay.height() : ymax;
 
   xmin = xmin < 0 ? 0 : xmin;
-  xmin = xmin > overlay->width() ? overlay->width() : xmin;
+  xmin = xmin > overlay.width() ? overlay.width() : xmin;
   xmax = xmax < 0 ? 0 : xmax;
-  xmax = xmax > overlay->width() ? overlay->width() : xmax;
+  xmax = xmax > overlay.width() ? overlay.width() : xmax;
 
   for (int x = xmin; x < xmax; x++){
     for (int y =ymin; y < ymax; y++){
@@ -53,9 +53,10 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
       }
 
 
-      overlay->setPixelColor(x,y,newColor);
+      overlay.setPixelColor(x,y,newColor);
     }
   }
+  m_processor->set_normal_overlay(overlay);
 }
 
 void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod){
@@ -218,7 +219,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     updateOverlay(xmin, xmax, ymin, ymax);
 
   } else {
-    QImage *overlay = m_processor->get_normal_overlay();
+    QImage overlay = m_processor->get_normal_overlay();
     QPainter p(&auxNormal);
     QPen pen(QColor(1,1,1,1));
     pen.setWidth(2*radius);
@@ -229,10 +230,10 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     p.setRenderHint(QPainter::Antialiasing, true);
     p.drawLine(in,fi);
 
-    for (int x=0; x < overlay->width(); x++){
-      for (int y=0; y < overlay->height(); y++){
+    for (int x=0; x < overlay.width(); x++){
+      for (int y=0; y < overlay.height(); y++){
         if (auxNormal.pixelColor(x,y).alphaF() != 0){
-          overlay->setPixelColor(x,y,QColor(0,0,0,0));
+          overlay.setPixelColor(x,y,QColor(0,0,0,0));
         }
       }
     }
@@ -254,9 +255,9 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
 
 void NormalBrushPlugin::mousePress(const QPoint &pos){
   m_processor = *processorPtr;
-  QImage *overlay = m_processor->get_normal_overlay();
-  oldNormal = QImage(overlay->width(),overlay->height(),QImage::Format_RGBA8888_Premultiplied);
-  oldNormal = *overlay;
+  QImage overlay = m_processor->get_normal_overlay();
+  oldNormal = QImage(overlay.width(),overlay.height(),QImage::Format_RGBA8888_Premultiplied);
+  oldNormal = overlay;
   auxNormal = QImage(oldNormal.width(), oldNormal.height(), QImage::Format_RGBA8888_Premultiplied);
   auxNormal.fill(QColor(0,0,0,0));
 
