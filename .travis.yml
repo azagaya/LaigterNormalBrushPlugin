@@ -26,7 +26,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: plugin/*.so
+  file: plugin/libnormalbrush.so
   skip_cleanup: true
   prerelease: true
   overwrite: true
