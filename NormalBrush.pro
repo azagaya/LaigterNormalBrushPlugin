@@ -42,6 +42,7 @@ isEmpty(PREFIX){
 
 target.path = $$PREFIX/
 
+DESTDIR = $$PREFIX
 INSTALLS += target
 
 CONFIG += install_ok  # Do not cargo-cult this!
