@@ -1,14 +1,21 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-QT           += widgets
-INCLUDEPATH  += ../laigter/
-INCLUDEPATH  += ../laigter/src/
+QT           += core gui widgets
 DESTDIR       = /home/azagaya/.local/share/laigter/plugins/
 
-isEmpty(LAIGTER_SRC)
-{
+TARGET = normalbrush
+
+CONFIG += core ui c++11
+
+isEmpty(LAIGTER_SRC){
   LAIGTER_SRC=../laigter
 }
+
+
+INCLUDEPATH  += $$LAIGTER_SRC/
+INCLUDEPATH  += $$LAIGTER_SRC/src/
+
+message($$LAIGTER_SRC)
 
 HEADERS += \
   src/normalbrushgui.h \
@@ -32,10 +39,11 @@ SOURCES += \
 FORMS += \
   src/normalbrushgui.ui
 
-isEmpty(PREFIX)
-{
+isEmpty(PREFIX){
   PREFIX = $$system(echo $HOME)/.local/share/laigter/plugins
 }
+
+message($$PREFIX)
 target.path = $$PREFIX/
 INSTALLS += target
 
