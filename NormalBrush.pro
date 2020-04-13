@@ -26,7 +26,10 @@ SOURCES += \
 FORMS += \
   src/normalbrushgui.ui
 
-target.path = /home/azagaya/.local/share/laigter/plugins/
+isEmpty(PREFIX){
+  PREFIX = $$system(echo $HOME)/.local/share/laigter/plugins
+}
+target.path = $$PREFIX/
 INSTALLS += target
 
 CONFIG += install_ok  # Do not cargo-cult this!

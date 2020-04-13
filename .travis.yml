@@ -1,0 +1,33 @@
+language: cpp
+compiler: gcc
+sudo: require
+dist: xenial
+
+before_install:
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.14.1-xenial -y
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get -y install qt514base qt514x11extras qt514tools libgl1-mesa-dev libopencv-dev 
+  - source /opt/qt*/bin/qt*-env.sh
+
+script:
+  - git clone https://github.com/azagaya/laigter.git
+  - qmake CONFIG+=release PREFIX=/ LAIGTER_SRC=./
+  - make -j$(nproc)
+  - make INSTALL_ROOT=bin -j$(nproc) install ; find bin/
+  - find bin/
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: bin/*
+  skip_cleanup: true
+  draft: true
+  overwrite: true
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
+
