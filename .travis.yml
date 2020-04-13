@@ -20,7 +20,7 @@ before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name "azagaya"
   - git config --local user.email "azagaya.games@gmail.com"
-  - export TRAVIS_TAG="continuous-$TRAVIS_BUILD_NUMBER"
+  - export TRAVIS_TAG="CI $(date +'%Y%m%d%H%M%S') BUILD: $TRAVIS_BUILD_NUMBER"
   - git tag $TRAVIS_TAG
 
 deploy:
