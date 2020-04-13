@@ -14,10 +14,11 @@ HEADERS += \
   src/normalbrushgui.h \
   src/normalbrushplugin.h \
   src/normalselectorwidget.h \
-  $$LAIGTER_SRC/laigter/src/image_processor.h \
-  $$LAIGTER_SRC/laigter/src/light_source.h\
-  $$LAIGTER_SRC/laigter/src/texture.h \
-  $$LAIGTER_SRC/laigter/src/sprite.h
+  $$LAIGTER_SRC/src/image_processor.h \
+  $$LAIGTER_SRC/src/light_source.h\
+  $$LAIGTER_SRC/src/texture.h \
+  $$LAIGTER_SRC/src/sprite.h \
+  $$LAIGTER_SRC/src/brush_interface.h
 
 SOURCES += \
   src/normalbrushgui.cpp \
