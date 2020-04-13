@@ -32,8 +32,6 @@ deploy:
   skip_cleanup: true
   prerelease: true
   overwrite: true
-  on:
-    tags: true
 
 branches:
   except:
