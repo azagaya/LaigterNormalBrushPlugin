@@ -15,8 +15,6 @@ script:
   - git clone https://github.com/azagaya/laigter.git
   - qmake CONFIG+=release PREFIX=plugin LAIGTER_SRC=laigter
   - make -j$(nproc)
-  - make INSTALL_ROOT=bin -j$(nproc) install ; find bin/
-  - find bin/
 
 before_deploy:
   # Set up git user name and tag this commit
@@ -28,7 +26,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: bin/home/travis/build/azagaya/LaigterNormalBrushPlugin/plugin/libnormalbrush.so 
+  file: plugin/*.so
   skip_cleanup: true
   prerelease: true
   overwrite: true
