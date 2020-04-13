@@ -23,7 +23,7 @@ deploy:
   api_key: $GITHUB_TOKEN
   file: bin/*
   skip_cleanup: true
-  draft: true
+  prerelease: true
   overwrite: true
 
 branches:
