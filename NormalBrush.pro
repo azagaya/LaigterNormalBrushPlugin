@@ -5,28 +5,34 @@ INCLUDEPATH  += ../laigter/
 INCLUDEPATH  += ../laigter/src/
 DESTDIR       = /home/azagaya/.local/share/laigter/plugins/
 
+isEmpty(LAIGTER_SRC)
+{
+  LAIGTER_SRC=../laigter
+}
+
 HEADERS += \
   src/normalbrushgui.h \
   src/normalbrushplugin.h \
   src/normalselectorwidget.h \
-  ../laigter/src/image_processor.h \
-  ../laigter/src/light_source.h\
-  ../laigter/src/texture.h \
-  ../laigter/src/sprite.h
+  $$LAIGTER_SRC/laigter/src/image_processor.h \
+  $$LAIGTER_SRC/laigter/src/light_source.h\
+  $$LAIGTER_SRC/laigter/src/texture.h \
+  $$LAIGTER_SRC/laigter/src/sprite.h
 
 SOURCES += \
   src/normalbrushgui.cpp \
   src/normalbrushplugin.cpp \
   src/normalselectorwidget.cpp \
-  ../laigter/src/image_processor.cpp\
-  ../laigter/src/light_source.cpp \
-  ../laigter/src/texture.cpp \
-  ../laigter/src/sprite.cpp
+  $$LAIGTER_SRC/src/image_processor.cpp\
+  $$LAIGTER_SRC/src/light_source.cpp \
+  $$LAIGTER_SRC/src/texture.cpp \
+  $$LAIGTER_SRC/src/sprite.cpp
 
 FORMS += \
   src/normalbrushgui.ui
 
-isEmpty(PREFIX){
+isEmpty(PREFIX)
+{
   PREFIX = $$system(echo $HOME)/.local/share/laigter/plugins
 }
 target.path = $$PREFIX/
