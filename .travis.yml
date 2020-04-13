@@ -28,7 +28,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: bin/plugin/*
+  file: bin/home/travis/build/azagaya/LaigterNormalBrushPlugin/plugin/libnormalbrush.so 
   skip_cleanup: true
   prerelease: true
   overwrite: true
