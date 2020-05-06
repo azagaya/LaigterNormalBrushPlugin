@@ -79,7 +79,6 @@ void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod){
 }
 
 void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
-
   m_processor = *processorPtr;
 
   if (!selected)
@@ -89,11 +88,14 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
   int w = m_processor->get_texture()->width();
   int h = m_processor->get_texture()->height();
 
+  QPoint oldP = WorldToLocal(oldPos);
+  QPoint newP = WorldToLocal(newPos);
+
   bool tilex = m_processor->get_tile_x();
   bool tiley = m_processor->get_tile_y();
 
-  QPoint in(oldPos);
-  QPoint fi(newPos);
+  QPoint in(oldP);
+  QPoint fi(newP);
 
   int xmin = std::min(in.x(),fi.x());
   int xmax = std::max(in.x(),fi.x());
@@ -127,12 +129,12 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
       QPoint point(fi.x(), fi.y());
 
       if (tilex){
-        point.setX(point.x() % w);
+        point.setX(WrapCoordinate(point.x(), w));
         xmin = std::min(xmin,point.x());
         xmax = std::max(xmax,point.x());
       }
       if (tiley){
-        point.setY(point.y() % h);
+        point.setY(WrapCoordinate(point.y(), h));
         ymin = std::min(ymin,point.y());
         ymax = std::max(ymax,point.y());
       }
@@ -176,12 +178,12 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
         QPoint point = path.pointAtPercent(percent).toPoint();
 
         if (tilex){
-          point.setX(point.x() % w);
+          point.setX(WrapCoordinate(point.x(), w));
           xmin = std::min(xmin,point.x());
           xmax = std::max(xmax,point.x());
         }
         if (tiley){
-          point.setY(point.y() % h);
+          point.setY(WrapCoordinate(point.y(), h));
           ymin = std::min(ymin,point.y());
           ymax = std::max(ymax,point.y());
         }
@@ -261,8 +263,9 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
   auxNormal = QImage(oldNormal.width(), oldNormal.height(), QImage::Format_RGBA8888_Premultiplied);
   auxNormal.fill(QColor(0,0,0,0));
 
+  QPoint newP = WorldToLocal(pos);
   /* Draw the point */
-  QPoint fi(pos);
+  QPoint fi(newP);
   QPainter p(&auxNormal);
 
   int w = m_processor->get_texture()->width();
@@ -290,10 +293,10 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
   QPoint point(fi.x(), fi.y());
 
   if (tilex){
-    point.setX(point.x() % w);
+    point.setX(WrapCoordinate(point.x(), w));
   }
   if (tiley){
-    point.setY(point.y() % h);
+    point.setY(WrapCoordinate(point.y(), h));
   }
 
   if (tilex){
@@ -413,4 +416,22 @@ void NormalBrushPlugin::updateBrushSprite(){
 }
 QObject * NormalBrushPlugin::getObject(){
   return this;
+}
+
+QPoint NormalBrushPlugin::WorldToLocal(QPoint world)
+{
+  int w = m_processor->get_texture()->width();
+  int h = m_processor->get_texture()->height();
+
+  QPoint origin = m_processor->get_position()->toPoint();
+
+  QPoint local = world + QPoint(0.5*w,-0.5*h) - origin;
+  local.setY(-local.y());
+
+  return local;
+}
+
+int NormalBrushPlugin::WrapCoordinate(int coord, int interval)
+{
+  return coord % interval + interval * (coord < 0 ? 1 : 0);
 }

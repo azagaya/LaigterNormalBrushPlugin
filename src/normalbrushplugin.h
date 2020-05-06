@@ -30,6 +30,9 @@ class NormalBrushPlugin : public QObject, public BrushInterface
   void updateOverlay(int xmin, int xmax, int ymin, int ymax);
   void updateBrushSprite();
   QObject * getObject() override;
+  QPoint WorldToLocal(QPoint world);
+  int WrapCoordinate(int coord, int interval);
+
   signals:
   void selected_changed(BrushInterface *brush);
 
