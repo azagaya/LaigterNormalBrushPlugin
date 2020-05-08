@@ -368,6 +368,10 @@ QPoint NormalBrushPlugin::WorldToLocal(QPoint world)
 
 int NormalBrushPlugin::WrapCoordinate(int coord, int interval)
 {
-  return coord % interval + interval * (coord < 0 ? 1 : 0);
+   coord %= interval;
+   if (coord < 0){
+     coord += interval;
+   }
+   return coord;
 }
 
