@@ -48,7 +48,7 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
       QColor auxColor = auxNormal.pixelColor(ix,iy);
       QColor newColor(0,0,0,0);
 
-      if (auxColor.alphaF() <= 1e-6 || m_processor->get_texture()->pixelColor(x,y).alphaF() == 0){
+      if (auxColor.alphaF() <= 1e-6 || m_processor->get_texture()->pixelColor(ix,iy).alphaF() == 0){
         newColor = oldColor;
       } else {
 
@@ -63,36 +63,64 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax){
         newColor.setAlphaF(outA);
 
       }
-
-
       overlay.setPixelColor(ix,iy,newColor);
     }
   }
   m_processor->set_normal_overlay(overlay);
 }
 
-void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod){
-
-  QRadialGradient gradient(point, radius);
-  normalColor = gui->get_normal();
-  normalColor.setAlphaF(normalColor.alphaF()*alpha_mod);
-  gradient.setColorAt(0,normalColor);
-  normalColor.setAlphaF(pow(0.5+hardness*0.5,2)*alpha_mod);
-  gradient.setColorAt(hardness,normalColor);
-  if (hardness != 1){
-    normalColor.setAlphaF(0);
-    gradient.setColorAt(1,normalColor);
-  }
-
-  QBrush brush(gradient);
-  p->setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
-                 Qt::MiterJoin));
+void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod, bool tile_x, bool tile_y){
 
   int w = p->device()->width();
   int h = p->device()->height();
 
-  p->drawEllipse(point.x()-radius/2,point.y()-radius/2,radius,radius);
+  QList <QPoint> pointList;
 
+  if (tile_x)
+  {
+    point.setX(WrapCoordinate(point.x(),w));
+  }
+
+  if (tile_y)
+  {
+    point.setY(WrapCoordinate(point.y(),h));
+  }
+
+  if (tile_x)
+  {
+
+    pointList.append(point - QPoint(w,0));
+    pointList.append(point + QPoint(w,0));
+  }
+
+  if (tile_y)
+  {
+    pointList.append(point - QPoint(0,h));
+    pointList.append(point + QPoint(0,h));
+  }
+
+  pointList.append(point);
+
+  foreach (QPoint point, pointList)
+  {
+    QRadialGradient gradient(point, radius);
+    normalColor = gui->get_normal();
+    normalColor.setAlphaF(normalColor.alphaF()*alpha_mod);
+    gradient.setColorAt(0,normalColor);
+    normalColor.setAlphaF(pow(0.5+hardness*0.5,2)*alpha_mod);
+    gradient.setColorAt(hardness,normalColor);
+    if (hardness != 1){
+      normalColor.setAlphaF(0);
+      gradient.setColorAt(1,normalColor);
+    }
+
+    QBrush brush(gradient);
+
+    p->setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
+                   Qt::MiterJoin));
+
+    p->drawEllipse(point.x()-radius/2,point.y()-radius/2,radius,radius);
+  }
 }
 
 void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
@@ -113,6 +141,9 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
   int ymin = std::min(in.y(),fi.y());
   int ymax = std::max(in.y(),fi.y());
 
+  bool tile_x = m_processor->get_tile_x();
+  bool tile_y = m_processor->get_tile_y();
+
   if (brushSelected){
 
     QPainter p(&auxNormal);
@@ -131,12 +162,9 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
       QBrush brush(gradient);
       p.setRenderHint(QPainter::Antialiasing, true);
       if (brushSelected)
-        p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
-                      Qt::MiterJoin));
-
+        p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
       QPoint point(fi.x(), fi.y());
-
-      drawAt(point, &p);
+      drawAt(point, &p, 1.0, tile_x, tile_y);
     }else{
       QPainterPath path;
       path.moveTo(in);
@@ -148,10 +176,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
       while (pos < length) {
         qreal percent = path.percentAtLength(pos);
         QPoint point = path.pointAtPercent(percent).toPoint();
-
-
-
-        drawAt(point,&p);
+        drawAt(point, &p, 1.0, tile_x, tile_y);
         pos += radius/4.0;
       }
     }
@@ -179,8 +204,6 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     }
 
   }
-  //}
-  //  }
 
   xmin = std::min(in.x(),fi.x());
   xmax = std::max(in.x(),fi.x());
@@ -200,6 +223,9 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
   oldNormal = overlay;
   auxNormal = QImage(oldNormal.width(), oldNormal.height(), QImage::Format_RGBA8888_Premultiplied);
   auxNormal.fill(QColor(0,0,0,0));
+
+  bool tile_x = m_processor->get_tile_x();
+  bool tile_y = m_processor->get_tile_y();
 
   QPoint newP = WorldToLocal(pos);
   /* Draw the point */
@@ -224,7 +250,7 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
 
   QPoint point(fi.x(), fi.y());
 
-  drawAt(point, &p);
+  drawAt(point, &p, 1.0, tile_x, tile_y);
   updateOverlay(fi.x()-radius, fi.x()+radius, fi.y()-radius, fi.y()+radius);
 
   QRect r(QPoint(fi.x()-radius,fi.y()-radius),QPoint(fi.x()+radius,fi.y()+radius));
@@ -345,98 +371,3 @@ int NormalBrushPlugin::WrapCoordinate(int coord, int interval)
   return coord % interval + interval * (coord < 0 ? 1 : 0);
 }
 
-
-//if (tilex){
-//  point.setX(WrapCoordinate(point.x(), w));
-//  xmin = std::min(xmin,point.x());
-//  xmax = std::max(xmax,point.x());
-//}
-//if (tiley){
-//  point.setY(WrapCoordinate(point.y(), h));
-//  ymin = std::min(ymin,point.y());
-//  ymax = std::max(ymax,point.y());
-//}
-
-//if (tilex){
-//  if (point.x() + radius >= w){
-//    drawAt(QPoint(point.x()-w,point.y()),&p);
-//    xmax = w;
-//    xmin = 0;
-//  } else if (point.x() - radius <= 0){
-//    drawAt(QPoint(point.x() + w, point.y()), &p);
-//    xmax = w;
-//    xmin = 0;
-//  }
-//}
-
-//if (tiley){
-//  if (point.y() + radius >= h){
-//    drawAt(QPoint(point.x(),point.y()-h),&p);
-//    ymax = h;
-//    ymin = 0;
-//  } else if (point.y() - radius <= 0){
-//    drawAt(QPoint(point.x(), point.y()+h), &p);
-//    ymax = h;
-//    ymin = 0;
-//  }
-//}
-
-//if (tilex){
-//  point.setX(WrapCoordinate(point.x(), w));
-//}
-//if (tiley){
-//  point.setY(WrapCoordinate(point.y(), h));
-//}
-
-//if (tilex){
-//  if (point.x() + radius >= w){
-//    drawAt(QPoint(point.x()-w,point.y()),&p);
-//  } else if (point.x() - radius <= 0){
-//    drawAt(QPoint(point.x() + w, point.y()), &p);
-//  }
-//}
-
-//if (tiley){
-//  if (point.y() + radius >= h){
-//    drawAt(QPoint(point.x(),point.y()-h),&p);
-//  } else if (point.y() - radius <= 0){
-//    drawAt(QPoint(point.x(), point.y()+h), &p);
-//  }
-//}
-
-
-//if (tilex){
-//  point.setX(WrapCoordinate(point.x(), w));
-//  xmin = std::min(xmin,point.x());
-//  xmax = std::max(xmax,point.x());
-//}
-//if (tiley){
-//  point.setY(WrapCoordinate(point.y(), h));
-//  ymin = std::min(ymin,point.y());
-//  ymax = std::max(ymax,point.y());
-//}
-
-//if (tilex){
-//  if (point.x() + radius >= w){
-//    drawAt(QPoint(point.x()-w,point.y()),&p);
-//    xmax = w;
-//    xmin = 0;
-//  } else if (point.x() - radius <= 0){
-//    drawAt(QPoint(point.x() + w, point.y()), &p);
-//    xmax = w;
-//    xmin = 0;
-
-//  }
-//}
-
-//if (tiley){
-//  if (point.y() + radius >= h){
-//    drawAt(QPoint(point.x(),point.y()-h),&p);
-//    ymax = h;
-//    ymin = 0;
-//  } else if (point.y() - radius <= 0){
-//    drawAt(QPoint(point.x(), point.y()+h), &p);
-//    ymax = h;
-//    ymin = 0;
-//  }
-//}

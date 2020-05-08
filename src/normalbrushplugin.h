@@ -26,7 +26,7 @@ class NormalBrushPlugin : public QObject, public BrushInterface
   QIcon getIcon() override;
   QString getName() override;
   QImage getBrushSprite() override;
-  void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0);
+  void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0, bool tile_x = false, bool tile_y = false);
   void updateOverlay(int xmin, int xmax, int ymin, int ymax);
   void updateBrushSprite();
   QObject * getObject() override;
