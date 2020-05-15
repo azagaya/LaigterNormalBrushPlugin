@@ -185,8 +185,9 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
 
   } else {
     QImage overlay = m_processor->get_normal_overlay();
-    QPainter p(&auxNormal);
-    QPen pen(QColor(1,1,1,1));
+    QPainter p(&overlay);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    QPen pen(QColor(0,0,0,0));
     pen.setWidth(2*radius);
     pen.setStyle(Qt::SolidLine);
     pen.setCapStyle(Qt::RoundCap);
@@ -195,14 +196,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     p.setRenderHint(QPainter::Antialiasing, true);
     p.drawLine(in,fi);
 
-    for (int x=0; x < overlay.width(); x++){
-      for (int y=0; y < overlay.height(); y++){
-        if (auxNormal.pixelColor(x,y).alphaF() != 0){
-          overlay.setPixelColor(x,y,QColor(0,0,0,0));
-        }
-      }
-    }
-
+    m_processor->set_normal_overlay(overlay);
   }
 
   xmin = std::min(in.x(),fi.x());
@@ -229,32 +223,47 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
 
   QPoint newP = WorldToLocal(pos);
   /* Draw the point */
+
   QPoint fi(newP);
-  QPainter p(&auxNormal);
-
-  QRadialGradient gradient(fi, radius);
-  normalColor = gui->get_normal();
-  gradient.setColorAt(0,normalColor);
-  normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
-  gradient.setColorAt(hardness,normalColor);
-  if (hardness != 1){
-    normalColor.setAlphaF(0);
-    gradient.setColorAt(1,normalColor);
-  }
-
-  QBrush brush(gradient);
-  p.setRenderHint(QPainter::Antialiasing, true);
   if (brushSelected)
-    p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
-                  Qt::MiterJoin));
+  {
+    QPainter p(&auxNormal);
 
-  QPoint point(fi.x(), fi.y());
+    QRadialGradient gradient(fi, radius);
+    normalColor = gui->get_normal();
+    gradient.setColorAt(0,normalColor);
+    normalColor.setAlphaF(pow(0.5+hardness*0.5,2));
+    gradient.setColorAt(hardness,normalColor);
+    if (hardness != 1){
+      normalColor.setAlphaF(0);
+      gradient.setColorAt(1,normalColor);
+    }
 
-  drawAt(point, &p, 1.0, tile_x, tile_y);
-  updateOverlay(fi.x()-radius, fi.x()+radius, fi.y()-radius, fi.y()+radius);
+    QBrush brush(gradient);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    if (brushSelected)
+      p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
+                    Qt::MiterJoin));
 
+    QPoint point(fi.x(), fi.y());
+
+    drawAt(point, &p, 1.0, tile_x, tile_y);
+    updateOverlay(fi.x()-radius, fi.x()+radius, fi.y()-radius, fi.y()+radius);
+  } else {
+    QImage overlay = m_processor->get_normal_overlay();
+    QPainter p(&overlay);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    QPen pen(QColor(0,0,0,0));
+    pen.setWidth(2*radius);
+    pen.setStyle(Qt::SolidLine);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::MiterJoin);
+    p.setPen(pen);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.drawPoint(fi);
+    m_processor->set_normal_overlay(overlay);
+  }
   QRect r(QPoint(fi.x()-radius,fi.y()-radius),QPoint(fi.x()+radius,fi.y()+radius));
-
   QtConcurrent::run(m_processor,&ImageProcessor::generate_normal_map,false,false,false,r);
 }
 
@@ -368,10 +377,10 @@ QPoint NormalBrushPlugin::WorldToLocal(QPoint world)
 
 int NormalBrushPlugin::WrapCoordinate(int coord, int interval)
 {
-   coord %= interval;
-   if (coord < 0){
-     coord += interval;
-   }
-   return coord;
+  coord %= interval;
+  if (coord < 0){
+    coord += interval;
+  }
+  return coord;
 }
 
