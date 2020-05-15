@@ -37,7 +37,7 @@ FORMS += \
   src/normalbrushgui.ui
 
 isEmpty(PREFIX){
-  PREFIX = /home/azagaya/.local/share/laigter/plugins
+  PREFIX = $$system(echo $HOME)/.local/share/laigter/plugins
 }
 
 target.path = $$PREFIX/
