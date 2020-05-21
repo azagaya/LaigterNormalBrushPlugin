@@ -113,9 +113,7 @@ void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod, bool 
       normalColor.setAlphaF(0);
       gradient.setColorAt(1,normalColor);
     }
-
     QBrush brush(gradient);
-
     p->setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
                    Qt::MiterJoin));
 
@@ -160,7 +158,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
       }
 
       QBrush brush(gradient);
-      p.setRenderHint(QPainter::Antialiasing, true);
+      p.setRenderHint(QPainter::Antialiasing, false);
       if (brushSelected)
         p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
       QPoint point(fi.x(), fi.y());
@@ -193,7 +191,7 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos){
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::MiterJoin);
     p.setPen(pen);
-    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setRenderHint(QPainter::Antialiasing, false);
     p.drawLine(in,fi);
 
     m_processor->set_normal_overlay(overlay);
@@ -240,7 +238,7 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
     }
 
     QBrush brush(gradient);
-    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setRenderHint(QPainter::Antialiasing, false);
     if (brushSelected)
       p.setPen(QPen(brush, radius, Qt::SolidLine, Qt::RoundCap,
                     Qt::MiterJoin));
@@ -259,7 +257,7 @@ void NormalBrushPlugin::mousePress(const QPoint &pos){
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::MiterJoin);
     p.setPen(pen);
-    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setRenderHint(QPainter::Antialiasing, false);
     p.drawPoint(fi);
     m_processor->set_normal_overlay(overlay);
   }
