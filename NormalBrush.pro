@@ -37,7 +37,12 @@ FORMS += \
   src/normalbrushgui.ui
 
 isEmpty(PREFIX){
-  PREFIX = $$system(echo $HOME)/.local/share/laigter/plugins
+unix{
+ PREFIX = $$system(echo $HOME)/.local/share/laigter/plugins
+}
+win32{
+ PREFIX = $$system(echo %APPDATA%)/laigter/plugins
+}
 }
 
 target.path = $$PREFIX/
@@ -56,3 +61,5 @@ DISTFILES += \
 RESOURCES += \
   icons.qrc \
   shaders.qrc
+
+win32: LIBS += -LC:\Qt\5.14.2\mingw73_64\lib\libQt5OpenGL.a -lopengl32
