@@ -1,21 +1,21 @@
 #ifndef NORMALBRUSHPLUGIN_H
 #define NORMALBRUSHPLUGIN_H
 
+#include <QIcon>
 #include <QObject>
 #include <QWidget>
-#include <QIcon>
 
-#include <brush_interface.h>
-#include <image_processor.h>
 #include "src/normalbrushgui.h"
 #include "src/normalselectorwidget.h"
-class NormalBrushPlugin : public QObject, public BrushInterface
-{
+#include <brush_interface.h>
+#include <image_processor.h>
+class NormalBrushPlugin : public QObject, public BrushInterface {
   Q_OBJECT
-  Q_PLUGIN_METADATA(IID "org.azagaya.laigter.plugins.BrushInterface" FILE "metadata.json")
+  Q_PLUGIN_METADATA(IID "org.azagaya.laigter.plugins.BrushInterface" FILE
+                        "metadata.json")
   Q_INTERFACES(BrushInterface)
 
-  public:
+public:
   void mousePress(const QPoint &pos) override;
   void mouseMove(const QPoint &oldPos, const QPoint &newPos) override;
   void mouseRelease(const QPoint &pos) override;
@@ -26,17 +26,18 @@ class NormalBrushPlugin : public QObject, public BrushInterface
   QIcon getIcon() override;
   QString getName() override;
   QImage getBrushSprite() override;
-  void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0, bool tile_x = false, bool tile_y = false);
+  void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0,
+              bool tile_x = false, bool tile_y = false);
   void updateOverlay(int xmin, int xmax, int ymin, int ymax);
   void updateBrushSprite();
-  QObject * getObject() override;
+  QObject *getObject() override;
   QPoint WorldToLocal(QPoint world);
   int WrapCoordinate(int coord, int interval);
 
-  signals:
+signals:
   void selected_changed(BrushInterface *brush);
 
-  public slots:
+public slots:
   void set_radius(int r);
   void set_normal(QColor n);
   void set_mix(int m);
@@ -45,8 +46,8 @@ class NormalBrushPlugin : public QObject, public BrushInterface
   void set_eraserSelected(bool e);
   void set_brushSelected(bool b);
 
-  private:
-  QImage *m_normal, auxNormal, oldNormal, brushSprite;
+private:
+  QImage *m_normal, auxNormal, oldNormal, brushSprite, diffuse;
   int radius;
   QColor normalColor;
   NormalBrushGui *gui;
@@ -55,7 +56,8 @@ class NormalBrushPlugin : public QObject, public BrushInterface
   float alpha = 0.8;
   float hardness = 0.8;
 
-  bool linesSelected = true, brushSelected = false, eraserSelected = false, selected = false;
+  bool linesSelected = true, brushSelected = false, eraserSelected = false,
+       selected = false;
   QString m_name = tr("Normal Brush Plugin");
 };
 
