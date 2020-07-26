@@ -1,7 +1,20 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>icons/brush-icon.png</file>
-        <file>icons/eraser-icon.png</file>
-        <file>icons/icon.png</file>
+        <file>icons/Classic Laigter/custom-icons/eraser-icon.png</file>
+        <file>icons/Classic Laigter/custom-icons/brush-normal.png</file>
+        <file>icons/Classic Laigter/custom-icons/brush-icon.png</file>
+        <file>icons/DarkBlue Laigter/custom-icons/eraser-icon.png</file>
+        <file>icons/DarkBlue Laigter/custom-icons/brush-normal.png</file>
+        <file>icons/DarkBlue Laigter/custom-icons/brush-icon.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>icons/Classic Laigter/custom-icons/brush-icon.png</file>
+        <file>icons/Classic Laigter/custom-icons/brush-normal.png</file>
+        <file>icons/Classic Laigter/custom-icons/eraser-icon.png</file>
+        <file>icons/Classic Laigter/index.theme</file>
+        <file>icons/DarkBlue Laigter/custom-icons/brush-icon.png</file>
+        <file>icons/DarkBlue Laigter/custom-icons/brush-normal.png</file>
+        <file>icons/DarkBlue Laigter/custom-icons/eraser-icon.png</file>
+        <file>icons/DarkBlue Laigter/index.theme</file>
     </qresource>
 </RCC>

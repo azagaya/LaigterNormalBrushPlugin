@@ -23,7 +23,7 @@ public:
   void set_selected(bool s) override;
   QWidget *loadGUI(QWidget *parent = nullptr) override;
   void setProcessor(ImageProcessor **processor) override;
-  QIcon getIcon() override;
+  QString getIcon() override;
   QString getName() override;
   QImage getBrushSprite() override;
   void drawAt(QPoint point, QPainter *p, float alpha_mod = 1.0,

@@ -333,9 +333,7 @@ void NormalBrushPlugin::set_brushSelected(bool b) {
     set_selected(b);
 }
 
-QIcon NormalBrushPlugin::getIcon() {
-  return QIcon(QPixmap(":/icons/icons/icon.png"));
-}
+QString NormalBrushPlugin::getIcon() { return "brush-normal"; }
 
 QString NormalBrushPlugin::getName() { return m_name; }
 
