@@ -1,6 +1,7 @@
 #include "src/normalbrushplugin.h"
 #include "src/normalbrushgui.h"
 #include <QDebug>
+#include <QPainterPath>
 #include <QRadialGradient>
 #include <QtConcurrent/QtConcurrent>
 #include <algorithm>
