@@ -206,8 +206,10 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos) {
   QRect r(QPoint(xmin - radius, ymin - radius),
           QPoint(xmax + radius, ymax + radius));
 
-  QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map, false,
-                    false, false, r);
+  //    QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map,
+  //    false, false, false, r);
+  m_processor->normal_counter = 1;
+  m_processor->rect_requested = m_processor->rect_requested.united(r);
 }
 
 void NormalBrushPlugin::mousePress(const QPoint &pos) {
@@ -266,13 +268,15 @@ void NormalBrushPlugin::mousePress(const QPoint &pos) {
   }
   QRect r(QPoint(fi.x() - radius, fi.y() - radius),
           QPoint(fi.x() + radius, fi.y() + radius));
-  QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map, false,
-                    false, false, r);
+  //  QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map,
+  //  false,
+  //                    false, false, r);
+  m_processor->normal_counter = 1;
+  m_processor->rect_requested = m_processor->rect_requested.united(r);
 }
 
 void NormalBrushPlugin::mouseRelease(const QPoint &pos) {
-  QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map, false,
-                    false, false, QRect(0, 0, 0, 0));
+  m_processor->normal_counter = 1;
 }
 
 void NormalBrushPlugin::setProcessor(ImageProcessor **processor) {
