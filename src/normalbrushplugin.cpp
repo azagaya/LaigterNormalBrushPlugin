@@ -130,6 +130,9 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos) {
   QPoint oldP = WorldToLocal(oldPos);
   QPoint newP = WorldToLocal(newPos);
 
+  bool tile_x = m_processor->get_tile_x();
+  bool tile_y = m_processor->get_tile_y();
+
   QPoint in(oldP);
   QPoint fi(newP);
 
@@ -138,9 +141,6 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos) {
 
   int ymin = std::min(in.y(), fi.y());
   int ymax = std::max(in.y(), fi.y());
-
-  bool tile_x = m_processor->get_tile_x();
-  bool tile_y = m_processor->get_tile_y();
 
   if (brushSelected) {
 
@@ -270,7 +270,10 @@ void NormalBrushPlugin::mousePress(const QPoint &pos) {
                     false, false, r);
 }
 
-void NormalBrushPlugin::mouseRelease(const QPoint &pos) {}
+void NormalBrushPlugin::mouseRelease(const QPoint &pos) {
+  QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map, false,
+                    false, false, QRect(0, 0, 0, 0));
+}
 
 void NormalBrushPlugin::setProcessor(ImageProcessor **processor) {
 
@@ -281,7 +284,7 @@ void NormalBrushPlugin::setProcessor(ImageProcessor **processor) {
 QWidget *NormalBrushPlugin::loadGUI(QWidget *parent) {
 
   gui = new NormalBrushGui(parent);
-  connect(gui, SIGNAL(radius_changed(int)), this, SLOT(set_radius(int)));
+  connect(gui, SIGNAL(radius_changed(int)), this, SLOT(set_base_radius(int)));
   connect(gui, SIGNAL(normal_changed(QColor)), this, SLOT(set_normal(QColor)));
   connect(gui, SIGNAL(mix_changed(int)), this, SLOT(set_mix(int)));
   connect(gui, SIGNAL(hardness_changed(int)), this, SLOT(set_hardness(int)));
@@ -292,8 +295,14 @@ QWidget *NormalBrushPlugin::loadGUI(QWidget *parent) {
   connect(gui, SIGNAL(eraserSelected_changed(bool)), this,
           SLOT(set_eraserSelected(bool)));
   radius = 10;
+  base_radius = 10;
   updateBrushSprite();
   return gui;
+}
+
+void NormalBrushPlugin::set_base_radius(int r) {
+  base_radius = r;
+  set_radius(r);
 }
 
 void NormalBrushPlugin::set_radius(int r) {
@@ -377,4 +386,11 @@ int NormalBrushPlugin::WrapCoordinate(int coord, int interval) {
     coord += interval;
   }
   return coord;
+}
+
+void NormalBrushPlugin::setPressure(float pressure) {
+  this->pressure = pressure;
+  float d = 0.2;
+  int new_radius = base_radius * ((2 - 2 * d) * pressure + d);
+  set_radius(new_radius);
 }

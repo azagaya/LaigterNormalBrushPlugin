@@ -19,6 +19,7 @@ public:
   void mousePress(const QPoint &pos) override;
   void mouseMove(const QPoint &oldPos, const QPoint &newPos) override;
   void mouseRelease(const QPoint &pos) override;
+  void setPressure(float pressure) override;
   bool get_selected() override;
   void set_selected(bool s) override;
   QWidget *loadGUI(QWidget *parent = nullptr) override;
@@ -39,6 +40,7 @@ signals:
 
 public slots:
   void set_radius(int r);
+  void set_base_radius(int r);
   void set_normal(QColor n);
   void set_mix(int m);
   void set_hardness(int h);
@@ -48,13 +50,14 @@ public slots:
 
 private:
   QImage *m_normal, auxNormal, oldNormal, brushSprite, diffuse;
-  int radius;
+  int radius, base_radius;
   QColor normalColor;
   NormalBrushGui *gui;
   ImageProcessor **processorPtr;
   ImageProcessor *m_processor;
   float alpha = 0.8;
   float hardness = 0.8;
+  float pressure = 1.0;
 
   bool linesSelected = true, brushSelected = false, eraserSelected = false,
        selected = false;
