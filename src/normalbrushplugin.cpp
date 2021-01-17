@@ -104,8 +104,10 @@ void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod,
   foreach (QPoint point, pointList) {
     QRadialGradient gradient(point, radius);
     normalColor = gui->get_normal();
+
     normalColor.setAlphaF(normalColor.alphaF() * alpha_mod);
 
+    p->setBrush(QBrush(normalColor));
     gradient.setColorAt(0, normalColor);
     normalColor.setAlphaF(hardness * alpha_mod);
     gradient.setColorAt(pow(hardness * radius, 2) / pow(radius, 2),
