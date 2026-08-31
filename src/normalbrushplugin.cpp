@@ -1,7 +1,9 @@
 #include "src/normalbrushplugin.h"
 #include "src/normalbrushgui.h"
 #include <QDebug>
+#include <QPainter>
 #include <QPainterPath>
+#include <QPen>
 #include <QRadialGradient>
 #include <QtConcurrent/QtConcurrent>
 #include <algorithm>
@@ -15,7 +17,13 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax) {
   topLeft = QPoint(xmin, ymin);
   botRight = QPoint(xmax, ymax);
 
-  QRect imageRect = diffuse.rect();
+  /* overlays start empty and can still be a different size than the sprite,
+   * and every one of them gets read below */
+  QRect imageRect = diffuse.rect()
+                        .intersected(overlay.rect())
+                        .intersected(oldNormal.rect())
+                        .intersected(auxNormal.rect());
+
   bool tile_x = m_processor->get_tile_x();
   bool tile_y = m_processor->get_tile_y();
 
@@ -38,19 +46,26 @@ void NormalBrushPlugin::updateOverlay(int xmin, int xmax, int ymin, int ymax) {
         if (tile_y) {
           iy = WrapCoordinate(iy, h);
         }
+        // tiling a single axis leaves the other one outside the image
+        if (!imageRect.contains(QPoint(ix, iy))) {
+          continue;
+        }
       }
 
       QColor oldColor = oldNormal.pixelColor(ix, iy);
       QColor auxColor = auxNormal.pixelColor(ix, iy);
       QColor newColor(0, 0, 0, 0);
 
-      if (auxColor.alphaF() <= 1e-6 ||
+      float outA = alpha * auxColor.alphaF() +
+                   oldColor.alphaF() * (1 - alpha * auxColor.alphaF());
+
+      /* outA at zero used to divide below and give nan, which turns into a
+       * garbage int and an invalid QColor */
+      if (auxColor.alphaF() <= 1e-6 || outA <= 1e-6 ||
           diffuse.pixelColor(ix, iy).alphaF() == 0) {
         newColor = oldColor;
       } else {
 
-        float outA = alpha * auxColor.alphaF() +
-                     oldColor.alphaF() * (1 - alpha * auxColor.alphaF());
         int r = auxColor.red() * alpha * auxColor.alphaF() / outA +
                 oldColor.red() * oldColor.alphaF() *
                     (1 - alpha * auxColor.alphaF()) / outA;
@@ -124,7 +139,6 @@ void NormalBrushPlugin::drawAt(QPoint point, QPainter *p, float alpha_mod,
 }
 
 void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos) {
-  m_processor = *processorPtr;
 
   if (!selected)
     return;
@@ -210,12 +224,11 @@ void NormalBrushPlugin::mouseMove(const QPoint &oldPos, const QPoint &newPos) {
 
   //    QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map,
   //    false, false, false, r);
-  m_processor->normal_counter = 1;
-  m_processor->rect_requested = m_processor->rect_requested.united(r);
+  m_processor->set_normal_counter(1);
+  m_processor->request_rect(r);
 }
 
 void NormalBrushPlugin::mousePress(const QPoint &pos) {
-  m_processor = *processorPtr;
   QImage overlay = m_processor->get_normal_overlay();
   oldNormal = QImage(overlay.width(), overlay.height(),
                      QImage::Format_RGBA8888_Premultiplied);
@@ -273,18 +286,20 @@ void NormalBrushPlugin::mousePress(const QPoint &pos) {
   //  QtConcurrent::run(m_processor, &ImageProcessor::generate_normal_map,
   //  false,
   //                    false, false, r);
-  m_processor->normal_counter = 1;
-  m_processor->rect_requested = m_processor->rect_requested.united(r);
+  m_processor->set_normal_counter(1);
+  m_processor->request_rect(r);
 }
 
 void NormalBrushPlugin::mouseRelease(const QPoint &pos) {
-  m_processor->normal_counter = 1;
+  m_processor->set_normal_counter(1);
 }
 
-void NormalBrushPlugin::setProcessor(ImageProcessor **processor) {
+void NormalBrushPlugin::setProcessor(ProcessorInterface *processor) {
+  if (!processor)
+    return;
 
-  processorPtr = processor;
-  (*processor)->get_current_frame()->get_image(TextureTypes::Diffuse, &diffuse);
+  m_processor = processor;
+  m_processor->get_current_diffuse(&diffuse);
 }
 
 QWidget *NormalBrushPlugin::loadGUI(QWidget *parent) {

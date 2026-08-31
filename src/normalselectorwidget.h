@@ -17,6 +17,7 @@ class NormalSelectorWidget : public QOpenGLWidget, protected QOpenGLFunctions
   QColor get_normal();
   private:
   void renderSphere();
+  QPoint framebufferPixel(QPointF local);
   QOpenGLVertexArrayObject sphereVAO, planeVAO;
   QOpenGLBuffer vbo, ebo, planeVbo, planeEbo;
   unsigned int indexCount;

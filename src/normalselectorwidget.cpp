@@ -33,11 +33,15 @@ void NormalSelectorWidget::initializeGL(){
   setUpdateBehavior(QOpenGLWidget::PartialUpdate);
 
 
-  sphere.link();
   sphere.addShaderFromSourceFile(QOpenGLShader::Vertex,
                                  ":/shaders/shaders/sphere_vertex.glsl");
   sphere.addShaderFromSourceFile(QOpenGLShader::Fragment,
                                  ":/shaders/shaders/sphere_fragment.glsl");
+  // the vao below uses 0, 1, 2, don't let the driver pick other slots
+  sphere.bindAttributeLocation("aPos", 0);
+  sphere.bindAttributeLocation("aTexCoords", 1);
+  sphere.bindAttributeLocation("aNormal", 2);
+  sphere.link();
 
   /* Prepare sphere */
 
@@ -240,9 +244,16 @@ void NormalSelectorWidget::resizeGL(int w, int h) {
   update();
 }
 
+// grabFramebuffer gives device pixels, localPos is in logical ones
+QPoint NormalSelectorWidget::framebufferPixel(QPointF local) {
+  qreal scale = width() ? qreal(rendered.width()) / width() : 1.0;
+  return QPoint(qBound(0, int(local.x() * scale), rendered.width() - 1),
+                qBound(0, int(local.y() * scale), rendered.height() - 1));
+}
+
 void NormalSelectorWidget::mousePressEvent(QMouseEvent *event) {
   p = QVector2D(event->localPos().x()/width()*2-1,-event->localPos().y()/height()*2+1);
-  c = rendered.pixelColor(event->localPos().x(),event->localPos().y());
+  c = rendered.pixelColor(framebufferPixel(event->localPos()));
   update();
   this->normal_changed(c);
 }
@@ -250,7 +261,7 @@ void NormalSelectorWidget::mousePressEvent(QMouseEvent *event) {
 void NormalSelectorWidget::mouseMoveEvent(QMouseEvent *event) {
   p = QVector2D(event->localPos().x()/width()*2-1,-event->localPos().y()/height()*2+1);
   if (p.x()<=-1 || p.x() >= 1 || p.y() <= -1 || p.y() >= 1) return;
-  c = rendered.pixelColor(event->localPos().x(),event->localPos().y());
+  c = rendered.pixelColor(framebufferPixel(event->localPos()));
   update();
   this->normal_changed(c);
 }

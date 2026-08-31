@@ -1,0 +1,171 @@
+name: Release
+on: [push, workflow_dispatch]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout plugin
+      uses: actions/checkout@v4
+
+    - name: Checkout Laigter interface
+      uses: actions/checkout@v4
+      with:
+        repository: azagaya/laigter
+        path: laigter
+        ref: master
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.2'
+        arch: 'win64_mingw'
+        target: 'desktop'
+        host: 'windows'
+        modules: 'qtimageformats'
+        tools: 'tools_mingw1310'
+
+    - name: Build plugin
+      shell: cmd
+      run: |
+        qmake CONFIG+=release PREFIX=plugin LAIGTER_SRC=laigter
+        make
+        if not exist plugin\normalbrush.dll exit /b 1
+
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: normalbrush-windows
+        path: plugin/normalbrush.dll
+
+    - name: Install Butler
+      if: startsWith(github.ref, 'refs/tags/')
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        New-Item -ItemType Directory -Path .butler | Out-Null
+        Invoke-WebRequest -UseBasicParsing `
+          -Uri 'https://broth.itch.zone/butler/windows-amd64/LATEST/archive/default' `
+          -OutFile butler.zip
+        Expand-Archive -LiteralPath butler.zip -DestinationPath .butler -Force
+        .\.butler\butler.exe -V
+
+    - name: Publish Windows plugin to itch.io
+      if: startsWith(github.ref, 'refs/tags/')
+      shell: powershell
+      env:
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      run: |
+        .\.butler\butler.exe push plugin\normalbrush.dll azagaya/laigter-brushes:normal-brush-windows --userversion $env:GITHUB_REF_NAME
+
+  linux:
+    runs-on: ubuntu-24.04
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+    steps:
+    - name: Checkout plugin
+      uses: actions/checkout@v5
+
+    - name: Checkout Laigter interface
+      uses: actions/checkout@v5
+      with:
+        repository: azagaya/laigter
+        path: laigter
+        ref: master
+
+    - name: Preparing Container
+      uses: pkgforge-dev/anylinux-setup-action@v1
+
+    - name: Install dependencies & Qt6 on Arch
+      run: |
+        set -eu
+        pacman -Syu --noconfirm
+        pacman -S --needed --noconfirm base-devel git make unzip qt6-base qt6-tools qt6-imageformats
+
+    - name: Build plugin
+      shell: bash
+      run: |
+        set -eu
+        /usr/bin/qmake6 CONFIG+=release PREFIX=plugin LAIGTER_SRC=laigter
+        make -j$(nproc)
+        test -f plugin/libnormalbrush.so
+
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: normalbrush-linux
+        path: plugin/libnormalbrush.so
+
+    - name: Install Butler
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        set -eu
+        mkdir .butler
+        curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+        unzip -q butler.zip -d .butler
+        chmod +x .butler/butler
+        .butler/butler -V
+
+    - name: Publish Linux plugin to itch.io
+      if: startsWith(github.ref, 'refs/tags/')
+      env:
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      run: |
+        .butler/butler push plugin/libnormalbrush.so azagaya/laigter-brushes:normal-brush-linux --userversion "$GITHUB_REF_NAME"
+
+  macos:
+    runs-on: macOS-latest
+    steps:
+    - name: Checkout plugin
+      uses: actions/checkout@v4
+
+    - name: Checkout Laigter interface
+      uses: actions/checkout@v4
+      with:
+        repository: azagaya/laigter
+        path: laigter
+        ref: master
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.11.1'
+        arch: 'clang_64'
+        modules: 'qtimageformats'
+
+    - name: Build plugin
+      shell: bash
+      run: |
+        set -eu
+        qmake CONFIG+=release PREFIX=plugin LAIGTER_SRC=laigter
+        make -j$(sysctl -n hw.ncpu)
+        test -f plugin/libnormalbrush.dylib
+
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: normalbrush-macos
+        path: plugin/libnormalbrush.dylib
+
+    - name: Install Butler
+      if: startsWith(github.ref, 'refs/tags/')
+      shell: bash
+      run: |
+        set -eu
+        case "$(uname -m)" in
+          arm64) BUTLER_PLATFORM=darwin-arm64 ;;
+          x86_64) BUTLER_PLATFORM=darwin-amd64 ;;
+          *) echo "Unsupported macOS architecture: $(uname -m)"; exit 1 ;;
+        esac
+        mkdir .butler
+        curl -L -o butler.zip "https://broth.itch.zone/butler/${BUTLER_PLATFORM}/LATEST/archive/default"
+        ditto -x -k butler.zip .butler
+        chmod +x .butler/butler
+        .butler/butler -V
+
+    - name: Publish macOS plugin to itch.io
+      if: startsWith(github.ref, 'refs/tags/')
+      shell: bash
+      env:
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      run: |
+        .butler/butler push plugin/libnormalbrush.dylib azagaya/laigter-brushes:normal-brush-mac --userversion "$GITHUB_REF_NAME"

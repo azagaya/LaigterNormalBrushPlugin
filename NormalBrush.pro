@@ -1,10 +1,11 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-QT           += core gui widgets
+# QOpenGLWidget moved to its own module in qt6
+QT           += core gui widgets opengl openglwidgets
 
 TARGET = normalbrush
 
-CONFIG += core ui c++11
+CONFIG += core ui c++17
 
 isEmpty(LAIGTER_SRC){
   LAIGTER_SRC=../laigter
@@ -18,20 +19,13 @@ HEADERS += \
   src/normalbrushgui.h \
   src/normalbrushplugin.h \
   src/normalselectorwidget.h \
-  $$LAIGTER_SRC/src/image_processor.h \
-  $$LAIGTER_SRC/src/light_source.h\
-  $$LAIGTER_SRC/src/texture.h \
-  $$LAIGTER_SRC/src/sprite.h \
-  $$LAIGTER_SRC/src/brush_interface.h
+  $$LAIGTER_SRC/src/brush_interface.h \
+  $$LAIGTER_SRC/src/processor_interface.h
 
 SOURCES += \
   src/normalbrushgui.cpp \
   src/normalbrushplugin.cpp \
-  src/normalselectorwidget.cpp \
-  $$LAIGTER_SRC/src/image_processor.cpp\
-  $$LAIGTER_SRC/src/light_source.cpp \
-  $$LAIGTER_SRC/src/texture.cpp \
-  $$LAIGTER_SRC/src/sprite.cpp
+  src/normalselectorwidget.cpp
 
 FORMS += \
   src/normalbrushgui.ui
@@ -62,4 +56,5 @@ RESOURCES += \
   icons.qrc \
   shaders.qrc
 
-win32: LIBS += -LC:\Qt\5.14.2\mingw73_64\lib\libQt5OpenGL.a -lopengl32
+# The qt opengl libs come from the QT line above, only the system one is left
+win32: LIBS += -lopengl32

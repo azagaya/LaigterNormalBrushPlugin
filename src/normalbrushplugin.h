@@ -8,7 +8,6 @@
 #include "src/normalbrushgui.h"
 #include "src/normalselectorwidget.h"
 #include <brush_interface.h>
-#include <image_processor.h>
 class NormalBrushPlugin : public QObject, public BrushInterface {
   Q_OBJECT
   Q_PLUGIN_METADATA(IID "org.azagaya.laigter.plugins.BrushInterface" FILE
@@ -23,7 +22,7 @@ public:
   bool get_selected() override;
   void set_selected(bool s) override;
   QWidget *loadGUI(QWidget *parent = nullptr) override;
-  void setProcessor(ImageProcessor **processor) override;
+  void setProcessor(ProcessorInterface *processor) override;
   QString getIcon() override;
   QString getName() override;
   QImage getBrushSprite() override;
@@ -53,8 +52,7 @@ private:
   int radius, base_radius;
   QColor normalColor;
   NormalBrushGui *gui;
-  ImageProcessor **processorPtr;
-  ImageProcessor *m_processor;
+  ProcessorInterface *m_processor = nullptr;
   float alpha = 0.8;
   float hardness = 0.8;
   float pressure = 1.0;
